@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>A Little Savings Journey</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --sky: #BCDCEB; --sky2: #6FB0CF; --sky-soft: #D9ECF3;
+      --cream: #FBF5E6; --paper: #FFFDF4; --card: #FFFCF2;
+      --grass: #9DC67B; --grass2: #6FA052; --grass-deep: #557E3D;
+      --sun: #F2C14E; --wheat: #EAC979;
+      --clay: #D88B57; --rust: #C2604A;
+      --ink: #4E4130; --bark: #6A5A42; --stone: #9C8B70;
+      --line: #E9DEC4;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #BCDCEB 0%, #CFE7EF 30%, #E8F1DF 62%, #FBF5E6 100%);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-bg {
+      position: relative;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+      padding: 0 16px calc(60px + env(safe-area-inset-bottom));
+    }
+
+    /* Loading & Login Screens */
+    #loading-screen {
+      position: fixed; inset: 0; background: var(--cream); z-index: 50;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Klee One', cursive; font-size: 19px; color: var(--bark); gap: 9px;
+      transition: opacity 0.4s ease;
+    }
+
+    #login-screen {
+      position: fixed; inset: 0; background: var(--cream); z-index: 60;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 20px; transition: opacity 0.4s ease;
+    }
+    
+    .login-box {
+      background: var(--card); border: 1.5px solid var(--line); border-radius: 26px;
+      padding: 32px 24px; width: 100%; max-width: 360px; 
+      box-shadow: 0 20px 46px -26px rgba(90,110,80,.5); text-align: center;
+      animation: rise .6s ease both;
+    }
+
+    /* Decorative Scenery */
+    .scenery { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+    .ground { position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; }
+    .bigcloud { position: absolute; background: #fff; border-radius: 50%; filter: blur(2px); opacity: .72; }
+    .bigcloud::before, .bigcloud::after { content: ""; position: absolute; background: #fff; border-radius: 50%; }
+    .c-a { width: 120px; height: 42px; top: 90px; left: -140px; animation: drift 46s linear infinite; }
+    .c-a::before { width: 70px; height: 70px; top: -30px; left: 18px; }
+    .c-a::after { width: 54px; height: 54px; top: -20px; left: 62px; }
+    .c-b { width: 90px; height: 34px; top: 200px; left: -160px; opacity: .6; animation: drift 64s linear infinite; animation-delay: -20s; }
+    .c-b::before { width: 52px; height: 52px; top: -24px; left: 14px; }
+    .c-b::after { width: 40px; height: 40px; top: -14px; left: 48px; }
+    .c-c { width: 140px; height: 48px; top: 46px; left: -180px; opacity: .5; animation: drift 80s linear infinite; animation-delay: -40s; }
+    .c-c::before { width: 80px; height: 80px; top: -34px; left: 22px; }
+    .c-c::after { width: 60px; height: 60px; top: -22px; left: 74px; }
+    @keyframes drift { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 220px)); } }
+
+    .wrap { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding-top: 34px; }
+
+    /* Header */
+    .head { text-align: center; margin-bottom: 22px; }
+    .wordmark { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; letter-spacing: .1em; color: var(--grass-deep); font-weight: 700; margin-bottom: 6px; }
+    .head h1 { font-family: 'Klee One', cursive; font-weight: 600; font-size: 36px; line-height: 1.04; margin: 0; color: var(--ink); text-shadow: 0 1px 0 rgba(255,255,255,.6); }
+    .jp { font-family: 'Klee One', cursive; font-size: 14px; color: var(--bark); margin: 4px 0 0; letter-spacing: .18em; }
+    .tagline { margin: 8px 0 0; color: var(--bark); font-size: 13.5px; }
+    .tagline b { color: var(--rust); font-weight: 700; }
+
+    /* Hero */
+    .hero { background: var(--card); border: 1.5px solid var(--line); border-radius: 26px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 20px 46px -26px rgba(90,110,80,.5); animation: rise .6s ease both; }
+    .scene { position: relative; height: 188px; }
+    .scene-svg { display: block; width: 100%; height: 100%; }
+    .scene-pct { position: absolute; top: 16px; left: 18px; display: flex; flex-direction: column; text-shadow: 0 1px 4px rgba(255,255,255,.65); }
+    .pct-num { font-family: 'Klee One', cursive; font-size: 38px; font-weight: 600; line-height: .9; color: var(--ink); }
+    .pct-num small { font-size: 18px; }
+    .pct-cap { font-size: 11px; letter-spacing: .12em; color: var(--bark); margin-top: 3px; font-weight: 500; }
+    .scene-goal { position: absolute; top: 14px; right: 14px; display: inline-flex; align-items: center; gap: 4px; background: rgba(255,253,244,.85); border: 1px solid var(--line); border-radius: 99px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--bark); backdrop-filter: blur(2px); }
+    .goal-star { transform-origin: 332px 42px; animation: twinkle 3.4s ease-in-out infinite; }
+    .marker circle:first-child { animation: pulse 2.4s ease-in-out infinite; transform-origin: center; }
+    .cl1 { animation: nudge 9s ease-in-out infinite; }
+    .cl2 { animation: nudge 11s ease-in-out infinite reverse; }
+
+    .hero-row { display: flex; align-items: center; gap: 16px; padding: 16px 22px 18px; }
+    .hstat { flex: 1; }
+    .hlabel { display: block; font-size: 10.5px; letter-spacing: .1em; color: var(--stone); margin-bottom: 3px; font-weight: 500; }
+    .hbig { font-family: 'Klee One', cursive; font-size: 25px; font-weight: 600; display: block; line-height: 1; margin-bottom: 7px; }
+    .hmed { font-family: 'Klee One', cursive; font-size: 21px; font-weight: 600; }
+    .hvsep { width: 1.5px; align-self: stretch; background: var(--line); }
+
+    /* Tabs */
+    .tabs { display: flex; gap: 6px; background: rgba(255,253,244,.7); border: 1.5px solid var(--line); padding: 5px; border-radius: 18px; margin-bottom: 18px; }
+    .tab { flex: 1; border: none; background: transparent; padding: 11px; border-radius: 13px; cursor: pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size: 14px; font-weight: 700; color: var(--bark); transition: .25s; }
+    .tab.on { background: var(--grass2); color: #fff; box-shadow: 0 7px 16px -8px rgba(85,126,61,.7); }
+
+    /* Panels */
+    .panel { background: var(--card); border: 1.5px solid var(--line); border-radius: 22px; padding: 22px; margin-bottom: 16px; box-shadow: 0 16px 40px -32px rgba(90,110,80,.55); animation: rise .5s ease both; }
+    .panel h2 { font-family: 'Klee One', cursive; font-weight: 600; font-size: 21px; margin: 0 0 16px; color: var(--ink); }
+    .empty { color: var(--stone); font-size: 14px; text-align: center; padding: 14px 0; }
+    .hint { color: var(--stone); font-size: 12px; margin: 10px 0 0; text-align: center; }
+
+    /* Category Pills */
+    .catrow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .catpill { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid var(--line); background: var(--paper); padding: 8px 13px; border-radius: 30px; cursor: pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size: 13px; font-weight: 500; color: var(--bark); transition: .2s; }
+    .catpill.on { background: #fff; font-weight: 700; box-shadow: 0 5px 13px -7px rgba(90,110,80,.6); }
+    .catpill i { width: 14px; height: 14px; stroke-width: 1.9px; }
+
+    /* Forms */
+    .formrow { display: flex; gap: 12px; }
+    .field { margin-bottom: 12px; display: flex; flex-direction: column; text-align: left; }
+    .field.grow { flex: 1; }
+    .field label { font-size: 11px; letter-spacing: .05em; color: var(--stone); margin-bottom: 6px; font-weight: 700; }
+    .field .opt { font-weight: 400; }
+    .field input, .field select { font-family: 'Zen Maru Gothic', sans-serif; font-size: 15px; color: var(--ink); border: 1.5px solid var(--line); background: var(--paper); border-radius: 13px; padding: 12px 14px; outline: none; width: 100%; transition: .2s; }
+    .field input:focus, .field select:focus { border-color: var(--grass2); background: #fff; box-shadow: 0 0 0 4px rgba(111,160,82,.15); }
+    .agrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .subhead { display: flex; align-items: center; gap: 7px; font-size: 12px; letter-spacing: .06em; color: var(--grass-deep); font-weight: 700; margin: 14px 0 10px; }
+
+    .btn { width: 100%; margin-top: 6px; border: none; cursor: pointer; border-radius: 15px; padding: 14px; font-family: 'Zen Maru Gothic', sans-serif; font-size: 14.5px; font-weight: 700; color: #fff; background: linear-gradient(135deg, var(--grass) 0%, var(--grass-deep) 100%); display: flex; align-items: center; justify-content: center; gap: 7px; box-shadow: 0 12px 26px -12px rgba(85,126,61,.75); transition: .2s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn i { width: 16px; height: 16px; stroke-width: 2.3px; }
+
+    /* Budget Grid */
+    .bgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    .bcard { background: var(--card); border: 1.5px solid var(--line); border-radius: 19px; padding: 16px; box-shadow: 0 14px 34px -30px rgba(90,110,80,.6); animation: rise .5s ease both; }
+    .bcard-top { display: flex; align-items: center; gap: 9px; margin-bottom: 11px; }
+    .bcard-icon { width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; color: #fff; flex: 0 0 28px; }
+    .bcard-titles { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+    .bcard-label { font-size: 13.5px; font-weight: 700; line-height: 1.1; }
+    .bcard-sub { font-size: 10px; color: var(--stone); }
+    .bcard-pct { font-family: 'Klee One', cursive; font-size: 16px; font-weight: 600; }
+    .bcard-amt { margin-bottom: 9px; }
+    .bcard-used { font-family: 'Klee One', cursive; font-size: 17px; font-weight: 600; }
+    .bcard-budget { font-size: 12px; color: var(--stone); }
+    .track { height: 7px; background: #E7EFD9; border-radius: 99px; overflow: hidden; }
+    .fill { height: 100%; border-radius: 99px; transition: width 1s cubic-bezier(.22,1,.36,1); }
+    .bcard-foot { font-size: 11.5px; margin-top: 8px; font-weight: 500; }
+
+    /* Delta */
+    .delta { display: inline-flex; align-items: center; gap: 2px; font-size: 11.5px; font-weight: 700; padding: 2px 7px; border-radius: 99px; vertical-align: middle; }
+    .delta i { width: 12px; height: 12px; stroke-width: 2.4px; }
+    .delta-up { color: #4d7a37; background: rgba(157,198,123,.3); }
+    .delta-down { color: var(--rust); background: rgba(216,139,87,.22); }
+    .delta-flat { color: var(--stone); background: rgba(156,139,112,.16); }
+    .delta-flat i { width: 11px; height: 11px; stroke-width: 2.2px; }
+
+    /* Lists */
+    .elist { list-style: none; margin: 0; padding: 0; }
+    .elist li { display: flex; align-items: center; gap: 11px; padding: 11px 0; border-bottom: 1px dashed var(--line); }
+    .elist li:last-child { border-bottom: none; }
+    .edot { width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center; color: #fff; flex: 0 0 30px; }
+    .edot i { width: 13px; height: 13px; stroke-width: 1.9px; }
+    .emain { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+    .enote { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .emeta { font-size: 11px; color: var(--stone); }
+    .eamt { font-family: 'Klee One', cursive; font-size: 15px; font-weight: 600; white-space: nowrap; }
+    .del { border: none; background: transparent; color: var(--stone); cursor: pointer; padding: 5px; border-radius: 8px; display: grid; place-items: center; transition: .2s; }
+    .del i { width: 14px; height: 14px; }
+    .del:hover { color: var(--rust); background: #F6E9DF; }
+
+    /* Snapshot */
+    .snap-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 14px; }
+    .snap-month { font-size: 12px; color: var(--bark); background: var(--paper); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--line); }
+    .snap-total { text-align: center; padding: 6px 0 16px; border-bottom: 1px dashed var(--line); margin-bottom: 6px; }
+    .snap-big { font-family: 'Klee One', cursive; font-size: 33px; font-weight: 600; display: block; line-height: 1; margin: 3px 0 9px; }
+    .snap-sub { display: flex; justify-content: space-between; align-items: center; margin: 14px 0 6px; font-size: 12px; color: var(--grass-deep); font-weight: 700; }
+    .snap-sub span { display: inline-flex; align-items: center; gap: 6px; }
+    .snap-sub i { width: 13px; height: 13px; stroke-width: 1.9px; }
+    .snap-sub b { font-family: 'Klee One', cursive; font-size: 15px; color: var(--ink); }
+    .line { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 14px; color: var(--bark); }
+    .line-r { display: inline-flex; align-items: center; gap: 8px; font-weight: 500; color: var(--ink); }
+
+    /* Footer & Backup Actions */
+    .foot { text-align: center; color: var(--stone); font-size: 12px; margin-top: 24px; padding-bottom: 10px; }
+    .backup-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 16px; }
+    .btn-sub {
+      background: rgba(255, 253, 244, 0.5); border: 1.5px solid var(--line); color: var(--bark);
+      padding: 8px 16px; border-radius: 99px; font-size: 12px; font-family: inherit; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: .2s; backdrop-filter: blur(4px);
+    }
+    .btn-sub:hover { background: var(--paper); border-color: var(--stone); transform: translateY(-1px); }
+    .btn-sub i { width: 14px; height: 14px; stroke-width: 2; }
+
+    /* Toast Notifications */
+    .toast {
+      position: fixed; bottom: calc(30px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--ink); color: #fff; padding: 12px 24px; border-radius: 99px; font-size: 13px;
+      opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 100; pointer-events: none;
+      display: flex; align-items: center; gap: 8px; font-weight: 600; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    @keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes twinkle { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .65; transform: scale(.85); } }
+    @keyframes pulse { 0%, 100% { opacity: .45; r: 10; } 50% { opacity: .1; } }
+    @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(8px); } }
+
+    @media(max-width: 430px) {
+      .head h1 { font-size: 30px; }
+      .scene { height: 168px; }
+      .pct-num { font-size: 33px; }
+    }
+
+    /* Tab Content Visibility */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div id="loading-screen" style="display: none;">
+    <i data-lucide="sprout"></i> unrolling the map…
+  </div>
+
+  <div id="login-screen">
+    <div class="login-box">
+      <div class="wordmark" style="justify-content: center; margin-bottom: 24px; font-size: 14px;">
+        <i data-lucide="sprout"></i> a little savings journey
+      </div>
+      <div class="field">
+        <label>email</label>
+        <input type="email" id="login-email" placeholder="you@email.com" onkeydown="handleEnter(event, window.handleLogin)">
+      </div>
+      <div class="field">
+        <label>password</label>
+        <input type="password" id="login-password" placeholder="••••••••" onkeydown="handleEnter(event, window.handleLogin)">
+      </div>
+      <button class="btn" style="margin-top: 12px;" onclick="window.handleLogin()">
+        <i data-lucide="log-in"></i> unlock journal
+      </button>
+    </div>
+  </div>
+
+  <div class="app-bg">
+    <!-- Scenery -->
+    <div class="scenery" aria-hidden="true">
+      <div class="bigcloud c-a"></div>
+      <div class="bigcloud c-b"></div>
+      <div class="bigcloud c-c"></div>
+      <svg class="ground" viewBox="0 0 1200 160" preserveAspectRatio="none">
+        <path d="M0,160 L0,90 C200,55 420,80 620,55 C820,30 1000,70 1200,45 L1200,160 Z" fill="#8FB871" opacity="0.55" />
+        <path d="M0,160 L0,120 C260,95 480,118 720,96 C940,76 1060,108 1200,92 L1200,160 Z" fill="#6FA052" opacity="0.7" />
+      </svg>
+    </div>
+
+    <div class="wrap">
+      <!-- Header -->
+      <header class="head">
+        <div class="wordmark"><i data-lucide="sprout"></i> a little savings journey</div>
+        <h1>the long climb home</h1>
+        <p class="jp">ちいさな貯金の旅</p>
+        <p class="tagline">up the hill to <b>HK$3.4M</b> by March 2027 · about <span id="months-left"></span> months of walking left</p>
+      </header>
+
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="scene">
+          <svg viewBox="0 0 360 210" class="scene-svg" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#BCDCEB" />
+                <stop offset="1" stopColor="#E9F3E2" />
+              </linearGradient>
+              <radialGradient id="sung" cx="50%" cy="50%" r="50%">
+                <stop offset="0" stopColor="#FBE7A4" />
+                <stop offset="55%" stopColor="#F4CB60" />
+                <stop offset="100%" stopColor="#F4CB60" stopOpacity="0" />
+              </radialGradient>
+              <linearGradient id="hillg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stopColor="#9DC67B" />
+                <stop offset="1" stopColor="#6FA052" />
+              </linearGradient>
+            </defs>
+            <rect width="360" height="210" fill="url(#sky)" />
+            <circle cx="64" cy="52" r="46" fill="url(#sung)" />
+            <circle cx="64" cy="52" r="19" fill="#F8DC7E" />
+            <g class="cl cl1" fill="#FFFFFF" opacity="0.92">
+              <ellipse cx="250" cy="44" rx="30" ry="13" />
+              <ellipse cx="272" cy="38" rx="20" ry="14" />
+            </g>
+            <g class="cl cl2" fill="#FFFFFF" opacity="0.8">
+              <ellipse cx="150" cy="70" rx="24" ry="10" />
+              <ellipse cx="166" cy="65" rx="15" ry="11" />
+            </g>
+            <path d="M0,150 C80,122 170,142 255,116 C312,99 342,110 360,98 L360,210 L0,210 Z" fill="#BBD89B" opacity="0.75" />
+            <path d="M0,210 L0,200 C90,176 195,150 272,108 C302,92 332,66 360,46 L360,210 Z" fill="url(#hillg)" />
+            <g>
+              <rect x="92" y="166" width="3" height="9" fill="#7A5A3C" />
+              <circle cx="93.5" cy="162" r="9" fill="#5E8C44" />
+            </g>
+            <path d="M28,188 C110,150 215,118 332,42" fill="none" stroke="#FBF5E6" strokeWidth="4.5" strokeLinecap="round" strokeDasharray="0.5 9" opacity="0.92" />
+            <g class="goal-star">
+              <circle cx="332" cy="42" r="13" fill="#FBE7A4" opacity="0.6" />
+              <path d="M332,30 l3,8 8.5,0.6 -6.5,5.5 2.2,8.3 -7.2,-4.6 -7.2,4.6 2.2,-8.3 -6.5,-5.5 8.5,-0.6 z" fill="#F4C247" stroke="#E0A82E" strokeWidth="0.8" />
+            </g>
+            <g class="marker" id="hill-marker">
+              <circle cx="28" cy="188" r="10" fill="#fff" opacity="0.45" />
+              <circle cx="28" cy="188" r="6" fill="#FBF5E6" stroke="#C2604A" strokeWidth="3" />
+            </g>
+          </svg>
+          <div class="scene-pct">
+            <span class="pct-num" id="hero-pct-num">0.0<small>%</small></span>
+            <span class="pct-cap">up the hill</span>
+          </div>
+          <div class="scene-goal"><i data-lucide="sparkles"></i> <span id="hero-target"></span></div>
+        </div>
+        <div class="hero-row">
+          <div class="hstat">
+            <span class="hlabel">net worth now</span>
+            <span class="hbig" id="hero-networth">HK$0</span>
+            <span id="hero-delta-container"></span>
+          </div>
+          <div class="hvsep"></div>
+          <div class="hstat">
+            <span class="hlabel">still to climb</span>
+            <span class="hmed" id="hero-remaining">HK$0</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabs Navigation -->
+      <nav class="tabs">
+        <button class="tab on" id="btn-tab-spending" onclick="switchTab('spending')">spending</button>
+        <button class="tab" id="btn-tab-assets" onclick="switchTab('assets')">assets</button>
+      </nav>
+
+      <!-- ============ SPENDING TAB ============ -->
+      <div id="tab-spending" class="tab-content active">
+        <!-- Add Expense Form -->
+        <section class="panel">
+          <h2>jot down a little spend</h2>
+          <div class="catrow" id="cat-selector">
+            <!-- Populated via JS -->
+          </div>
+          <div class="formrow">
+            <div class="field grow">
+              <label>amount (HK$)</label>
+              <input type="number" inputmode="decimal" placeholder="0" id="exp-amt" onkeydown="handleEnter(event, window.addExpense)">
+            </div>
+            <div class="field">
+              <label>date</label>
+              <input type="date" id="exp-date">
+            </div>
+          </div>
+          <div class="field">
+            <label>note <span class="opt">(optional)</span></label>
+            <input type="text" placeholder="matcha, train ticket, a small treat…" id="exp-note" onkeydown="handleEnter(event, window.addExpense)">
+          </div>
+          <button class="btn" onclick="window.addExpense()"><i data-lucide="plus"></i> add to the journal</button>
+        </section>
+
+        <!-- Budgets -->
+        <div class="bgrid" id="budget-grid">
+          <!-- Populated via JS -->
+        </div>
+
+        <!-- Recent Expenses -->
+        <section class="panel">
+          <h2>lately</h2>
+          <div id="expenses-container">
+            <!-- Populated via JS -->
+          </div>
+        </section>
+      </div>
+
+      <!-- ============ ASSETS TAB ============ -->
+      <div id="tab-assets" class="tab-content">
+        <!-- Add Log Form -->
+        <section class="panel">
+          <h2>a resting place</h2>
+          <div class="field">
+            <label>date</label>
+            <input type="date" id="log-date">
+          </div>
+          <div class="subhead"><i data-lucide="wallet"></i> current assets</div>
+          <div class="agrid" id="form-current-assets">
+            <!-- Populated via JS -->
+          </div>
+          <div class="subhead"><i data-lucide="mountain"></i> fixed assets</div>
+          <div class="agrid" id="form-fixed-assets">
+            <!-- Populated via JS -->
+          </div>
+          
+          <!-- Add New Asset Field UI -->
+          <div id="add-asset-ui" style="display: none; background: var(--paper); padding: 12px; border-radius: 12px; border: 1px dashed var(--line); margin: 16px 0;">
+             <div class="field"><label>new asset name</label><input type="text" id="new-asset-name" placeholder="e.g. Stocks"></div>
+             <div class="field"><label>type</label>
+               <select id="new-asset-type">
+                  <option value="current">Current</option>
+                  <option value="fixed">Fixed</option>
+               </select>
+             </div>
+             <div style="display:flex; gap: 8px;">
+               <button class="btn-sub" onclick="window.confirmAddAsset()"><i data-lucide="check"></i> add</button>
+               <button class="btn-sub" onclick="window.toggleAddAsset()"><i data-lucide="x"></i> cancel</button>
+             </div>
+          </div>
+          <button class="btn-sub" style="width: 100%; margin: 16px 0; justify-content: center;" onclick="window.toggleAddAsset()">
+            <i data-lucide="plus-circle"></i> new asset category
+          </button>
+
+          <button class="btn" onclick="window.saveLog()"><i data-lucide="plus"></i> save this log</button>
+          <p class="hint">saving the same date again just updates it 🍃</p>
+        </section>
+
+        <!-- Snapshot -->
+        <div id="snapshot-container">
+          <!-- Populated via JS -->
+        </div>
+
+        <!-- Trail Behind (History) -->
+        <div id="trail-container">
+          <!-- Populated via JS -->
+        </div>
+      </div>
+
+      <!-- Footer & Actions -->
+      <footer class="foot">
+        <div>
+          step by step, the hill grows smaller 🍃 
+          <span style="color: var(--sky2); margin-left: 4px;"><i data-lucide="cloud"></i> cloud synced</span>
+        </div>
+        <div class="backup-row">
+          <button class="btn-sub" onclick="window.exportData()"><i data-lucide="download"></i> backup journal</button>
+          <button class="btn-sub" onclick="window.triggerImport()"><i data-lucide="upload"></i> restore</button>
+          <button class="btn-sub" onclick="window.handleLogout()" style="color: var(--rust); border-color: rgba(194,96,74,0.3);"><i data-lucide="log-out"></i> log out</button>
+          
+          <!-- Hidden file input for import -->
+          <input type="file" id="import-file" accept=".json" style="display: none;">
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <script type="module">
+    // Import the exact Firebase v12.14.0 SDKs
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-analytics.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.14.0/firebase-firestore.js";
+
+    /* ------------------------------------------------------------------ */
+    /* Cloud Sync State & Init                                            */
+    /* ------------------------------------------------------------------ */
+    
+    // The exact configuration you provided
+    const firebaseConfig = {
+      apiKey: "AIzaSyDOV9mVashVnDG6w_zZNXFkc3Qu9DbstZc",
+      authDomain: "saving-journey.firebaseapp.com",
+      projectId: "saving-journey",
+      storageBucket: "saving-journey.firebasestorage.app",
+      messagingSenderId: "237176417954",
+      appId: "1:237176417954:web:1a448470c08eea7e1031fb",
+      measurementId: "G-7WMTETHVH1"
+    };
+
+    // Initialize Firebase Services
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    
+    let currentUser = null;
+    let unsubscribes = [];
+    
+    /* ------------------------------------------------------------------ */
+    /* App Configuration & State                                          */
+    /* ------------------------------------------------------------------ */
+    const TARGET = 3400000;
+    const TARGET_DATE = new Date(2027, 2, 31); // March 31, 2027
+
+    const CATS = {
+      daily:    { key: 'daily',    label: "Daily",    budget: 12000, period: "monthly", icon: "coffee",      tint: "var(--grass2)" },
+      travel:   { key: 'travel',   label: "Travel",   budget: 80000, period: "total",   icon: "plane",       tint: "var(--sky2)" },
+      shopping: { key: 'shopping', label: "Shopping", budget: 50000, period: "total",   icon: "shopping-bag", tint: "var(--clay)" },
+      rental:   { key: 'rental',   label: "Rental",   budget: 75000, period: "total",   icon: "home",        tint: "var(--rust)" },
+      others:   { key: 'others',   label: "Others",   budget: 10000, period: "monthly", icon: "inbox",       tint: "var(--stone)" },
+    };
+
+    let ASSET_FIELDS = {
+      current: [
+        { key: "cash",    label: "Cash" },
+        { key: "cashFam", label: "Cash at family" },
+      ],
+      fixed: [
+        { key: "mpf",       label: "MPF" },
+        { key: "deposit",   label: "Rental deposit" },
+        { key: "sharesave", label: "Sharesave" },
+      ]
+    };
+    const getAllAssetKeys = () => [...ASSET_FIELDS.current, ...ASSET_FIELDS.fixed].map(f => f.key);
+
+    let expenses = [];
+    let logs = [];
+    let selectedCat = 'daily';
+
+    /* ------------------------------------------------------------------ */
+    /* Helpers                                                            */
+    /* ------------------------------------------------------------------ */
+    const money = (n) => "HK$" + Math.round(n || 0).toLocaleString("en-US");
+    const moneyShort = (n) => {
+      n = n || 0;
+      if (Math.abs(n) >= 1000000) return "HK$" + (n / 1000000).toFixed(2) + "M";
+      if (Math.abs(n) >= 1000) return "HK$" + (n / 1000).toFixed(1) + "k";
+      return "HK$" + Math.round(n);
+    };
+    const thisMonthKey = () => {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    };
+    const getTodayStr = () => new Date().toISOString().slice(0, 10);
+    const monthsLeft = () => {
+      const now = new Date();
+      return Math.max(0, (TARGET_DATE.getFullYear() - now.getFullYear()) * 12 + (TARGET_DATE.getMonth() - now.getMonth()));
+    };
+    const sumLog = (log) => log ? getAllAssetKeys().reduce((s, k) => s + (Number(log[k]) || 0), 0) : 0;
+    const bez = (t, a, b, c, d) => {
+      const m = 1 - t;
+      return m*m*m*a + 3*m*m*t*b + 3*m*t*t*c + t*t*t*d;
+    };
+
+    window.handleEnter = (e, callback) => {
+      if (e.key === 'Enter') callback();
+    };
+
+    /* Notification System */
+    const showToast = (msg, icon = 'check-circle') => {
+      let toast = document.getElementById('sys-toast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sys-toast';
+        toast.className = 'toast';
+        document.body.appendChild(toast);
+      }
+      toast.innerHTML = `<i data-lucide="${icon}" style="width:18px;height:18px"></i> ${msg}`;
+      lucide.createIcons({ root: toast });
+      
+      void toast.offsetWidth; // Force reflow
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3500);
+    };
+
+    /* ------------------------------------------------------------------ */
+    /* Authentication & Cloud Listeners                                   */
+    /* ------------------------------------------------------------------ */
+    
+    window.handleLogin = async () => {
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-password').value;
+      if(!email || !pass) return showToast('Please enter both email and password.', 'alert-circle');
+      
+      try {
+        await signInWithEmailAndPassword(auth, email, pass);
+        // Successful login is handled securely by onAuthStateChanged
+        showToast('Welcome back 🍃', 'sparkles');
+      } catch(err) {
+        console.error(err);
+        showToast('Incorrect email or password.', 'x-circle');
+      }
+    };
+
+    window.handleLogout = async () => {
+      await signOut(auth);
+      window.location.reload();
+    };
+
+    const setupListeners = () => {
+      if (!currentUser) return;
+      const uid = currentUser.uid;
+
+      // Expenses Listener -> Syncing strictly to /users/{uid}/expenses
+      const expUnsub = onSnapshot(collection(db, 'users', uid, 'expenses'), (snapshot) => {
+        expenses = snapshot.docs.map(d => d.data());
+        expenses.sort((a, b) => b.id - a.id); // Latest first
+        updateUI();
+      }, (err) => console.error("Expenses error", err));
+      unsubscribes.push(expUnsub);
+
+      // Logs Listener -> Syncing strictly to /users/{uid}/logs
+      const logUnsub = onSnapshot(collection(db, 'users', uid, 'logs'), (snapshot) => {
+        logs = snapshot.docs.map(d => d.data());
+        logs.sort((a, b) => a.date.localeCompare(b.date));
+        updateUI();
+      }, (err) => console.error("Logs error", err));
+      unsubscribes.push(logUnsub);
+
+      // Settings/Assets Listener -> Syncing strictly to /users/{uid}/settings
+      const assetUnsub = onSnapshot(doc(db, 'users', uid, 'settings', 'assetConfig'), (docSnap) => {
+        if (docSnap.exists()) {
+          ASSET_FIELDS = docSnap.data();
+        } else {
+           setDoc(doc(db, 'users', uid, 'settings', 'assetConfig'), ASSET_FIELDS);
+        }
+        initForms();
+        updateUI();
+      }, (err) => console.error("Assets error", err));
+      unsubscribes.push(assetUnsub);
+      
+      // Hide loading screen once auth is ready
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => loader.style.display = 'none', 400);
+        }
+      }, 500);
+    };
+
+    const cleanupListeners = () => {
+      unsubscribes.forEach(unsub => unsub());
+      unsubscribes = [];
+    };
+
+    window.exportData = () => {
+      const data = {
+        version: "1.0",
+        exportDate: new Date().toISOString(),
+        expenses: expenses,
+        logs: logs
+      };
+      
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `savings-journey-backup-${getTodayStr()}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showToast('Journal backed up safely.', 'download-cloud');
+    };
+
+    window.triggerImport = () => {
+      document.getElementById('import-file').click();
+    };
+
+    window.handleImport = async (e) => {
+      if (!currentUser) return;
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const data = JSON.parse(event.target.result);
+          
+          if (data.expenses && Array.isArray(data.expenses) && data.logs && Array.isArray(data.logs)) {
+            showToast('Syncing to cloud...', 'refresh-cw');
+            
+            // Sync expenses
+            for (const exp of data.expenses) {
+                await setDoc(doc(db, 'users', currentUser.uid, 'expenses', exp.id.toString()), exp);
+            }
+            // Sync logs
+            for (const log of data.logs) {
+                if (log.month && !log.date) {
+                  log.date = log.month + "-01";
+                  delete log.month;
+                }
+                await setDoc(doc(db, 'users', currentUser.uid, 'logs', log.id.toString()), log);
+            }
+            
+            showToast('Cloud restore complete!', 'sparkles');
+          } else {
+            showToast('Invalid backup file.', 'alert-circle');
+          }
+        } catch (err) {
+          console.error(err);
+          showToast('Error reading file.', 'x-circle');
+        }
+        e.target.value = ''; // Reset file input
+      };
+      reader.readAsText(file);
+    };
+
+    /* ------------------------------------------------------------------ */
+    /* UI Render Generators                                               */
+    /* ------------------------------------------------------------------ */
+    const renderDelta = (value) => {
+      if (!value) return `<span class="delta delta-flat"><i data-lucide="minus"></i> no change</span>`;
+      const up = value > 0;
+      const icon = up ? 'arrow-up-right' : 'arrow-down-right';
+      const cssClass = up ? 'delta-up' : 'delta-down';
+      return `<span class="delta ${cssClass}"><i data-lucide="${icon}"></i>${moneyShort(Math.abs(value))}</span>`;
+    };
+
+    const renderBudgetCard = (catKey, used) => {
+      const cat = CATS[catKey];
+      const pct = cat.budget ? (used / cat.budget) * 100 : 0;
+      const over = used > cat.budget;
+      const barColor = over ? "var(--rust)" : pct > 78 ? "var(--sun)" : cat.tint;
+      const pctTextCol = over ? "var(--rust)" : "var(--bark)";
+      const footTextCol = over ? "var(--rust)" : "var(--stone)";
+      const footText = over ? `over by ${money(used - cat.budget)}` : `${money(cat.budget - used)} left`;
+      const subLabel = cat.period === "monthly" ? "this month" : "till Mar 2027";
+
+      return `
+        <div class="bcard">
+          <div class="bcard-top">
+            <span class="bcard-icon" style="background: ${cat.tint}">
+              <i data-lucide="${cat.icon}"></i>
+            </span>
+            <div class="bcard-titles">
+              <span class="bcard-label">${cat.label}</span>
+              <span class="bcard-sub">${subLabel}</span>
+            </div>
+            <span class="bcard-pct" style="color: ${pctTextCol}">${Math.round(pct)}%</span>
+          </div>
+          <div class="bcard-amt">
+            <span class="bcard-used">${money(used)}</span>
+            <span class="bcard-budget"> / ${money(cat.budget)}</span>
+          </div>
+          <div class="track">
+            <div class="fill" style="width: ${Math.min(100, pct)}%; background: ${barColor}"></div>
+          </div>
+          <div class="bcard-foot" style="color: ${footTextCol}">
+            ${footText}
+          </div>
+        </div>
+      `;
+    };
+
+    /* ------------------------------------------------------------------ */
+    /* Actions                                                            */
+    /* ------------------------------------------------------------------ */
+    window.switchTab = (tab) => {
+      document.getElementById('btn-tab-spending').classList.toggle('on', tab === 'spending');
+      document.getElementById('btn-tab-assets').classList.toggle('on', tab === 'assets');
+      document.getElementById('tab-spending').classList.toggle('active', tab === 'spending');
+      document.getElementById('tab-assets').classList.toggle('active', tab === 'assets');
+    };
+
+    window.selectCategory = (key) => {
+      selectedCat = key;
+      updateUI();
+    };
+
+    window.addExpense = async () => {
+      if (!currentUser) return;
+      const amtInput = document.getElementById('exp-amt');
+      const dateInput = document.getElementById('exp-date');
+      const noteInput = document.getElementById('exp-note');
+      
+      const a = parseFloat(amtInput.value);
+      if (!a || a <= 0) return;
+      
+      const newExp = {
+        id: Date.now(),
+        cat: selectedCat,
+        amount: a,
+        date: dateInput.value || getTodayStr(),
+        note: noteInput.value.trim()
+      };
+      
+      try {
+        await setDoc(doc(db, 'users', currentUser.uid, 'expenses', newExp.id.toString()), newExp);
+        amtInput.value = '';
+        noteInput.value = '';
+        showToast('Added to cloud.', 'cloud-upload');
+      } catch (err) {
+        showToast('Sync error.', 'x-circle');
+      }
+    };
+
+    window.delExpense = async (id) => {
+      if (!currentUser) return;
+      try {
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'expenses', id.toString()));
+        showToast('Entry removed.', 'trash-2');
+      } catch(e) {
+         showToast('Delete error.', 'x-circle');
+      }
+    };
+
+    window.saveLog = async () => {
+      if (!currentUser) return;
+      const dateInput = document.getElementById('log-date').value;
+      if (!dateInput) return;
+
+      let entryId = Date.now().toString();
+      const existing = logs.find(l => l.date === dateInput);
+      if (existing) {
+        entryId = existing.id.toString();
+      }
+
+      const entry = { id: entryId, date: dateInput };
+      getAllAssetKeys().forEach(k => {
+        const val = parseFloat(document.getElementById(`log-${k}`).value);
+        entry[k] = isNaN(val) ? 0 : val;
+      });
+
+      try {
+        await setDoc(doc(db, 'users', currentUser.uid, 'logs', entryId), entry);
+        resetLogForm();
+        showToast('Log saved to cloud.', 'cloud-upload');
+      } catch (err) {
+        showToast('Sync error.', 'x-circle');
+      }
+    };
+
+    window.delLog = async (id) => {
+      if (!currentUser) return;
+      try {
+          await deleteDoc(doc(db, 'users', currentUser.uid, 'logs', id.toString()));
+          showToast('Log removed.', 'trash-2');
+      } catch (err) { showToast('Delete error.', 'x-circle'); }
+    };
+
+    const resetLogForm = () => {
+      document.getElementById('log-date').value = getTodayStr();
+      getAllAssetKeys().forEach(k => {
+        const input = document.getElementById(`log-${k}`);
+        if(input) input.value = '';
+      });
+    }
+
+    window.toggleAddAsset = () => {
+      const ui = document.getElementById('add-asset-ui');
+      ui.style.display = ui.style.display === 'none' ? 'block' : 'none';
+    };
+
+    window.confirmAddAsset = async () => {
+      if (!currentUser) return;
+      const name = document.getElementById('new-asset-name').value.trim();
+      const type = document.getElementById('new-asset-type').value;
+      if (!name) return;
+
+      const key = name.toLowerCase().replace(/[^a-z0-9]/g, '') + Date.now().toString().slice(-4);
+      
+      const newAssets = JSON.parse(JSON.stringify(ASSET_FIELDS));
+      newAssets[type].push({ key, label: name });
+
+      try {
+         await setDoc(doc(db, 'users', currentUser.uid, 'settings', 'assetConfig'), newAssets);
+         document.getElementById('new-asset-name').value = '';
+         window.toggleAddAsset();
+         showToast('Asset category synced.', 'cloud-upload');
+      } catch (e) { showToast('Sync error.', 'x-circle'); }
+    };
+
+    /* ------------------------------------------------------------------ */
+    /* Main UI Update Loop                                                */
+    /* ------------------------------------------------------------------ */
+    const updateUI = () => {
+      /* Calculate Goals */
+      const sorted = [...logs].sort((a, b) => a.date.localeCompare(b.date));
+      const latest = sorted[sorted.length - 1];
+      const prev = sorted[sorted.length - 2];
+      const netWorth = sumLog(latest);
+      const goalPct = Math.min(100, Math.max(0, (netWorth / TARGET) * 100));
+      const totalDelta = latest ? netWorth - sumLog(prev) : 0;
+      
+      /* Update Hero Texts */
+      document.getElementById('months-left').textContent = monthsLeft();
+      document.getElementById('hero-pct-num').innerHTML = `${goalPct.toFixed(1)}<small>%</small>`;
+      document.getElementById('hero-target').textContent = moneyShort(TARGET);
+      document.getElementById('hero-networth').textContent = money(netWorth);
+      document.getElementById('hero-remaining').textContent = moneyShort(Math.max(0, TARGET - netWorth));
+      document.getElementById('hero-delta-container').innerHTML = latest ? renderDelta(totalDelta) : '';
+
+      /* Update Hero SVG Curve */
+      const t = goalPct / 100;
+      const mx = bez(t, 28, 110, 215, 332);
+      const my = bez(t, 188, 150, 118, 42);
+      const markers = document.getElementById('hill-marker').querySelectorAll('circle');
+      markers.forEach(c => {
+        c.setAttribute('cx', mx);
+        c.setAttribute('cy', my);
+      });
+
+      /* Update Spending Tab */
+      // Cat Selector
+      document.getElementById('cat-selector').innerHTML = Object.values(CATS).map(c => `
+        <button class="catpill ${selectedCat === c.key ? 'on' : ''}" 
+                onclick="window.selectCategory('${c.key}')" 
+                style="${selectedCat === c.key ? `border-color: ${c.tint}` : ''}">
+          <i data-lucide="${c.icon}" style="color: ${c.tint}"></i> ${c.label}
+        </button>
+      `).join('');
+
+      // Budgets
+      const mk = thisMonthKey();
+      const used = {};
+      Object.keys(CATS).forEach(k => {
+        const cat = CATS[k];
+        if (cat.period === "monthly") {
+          used[k] = expenses.filter(e => e.cat === k && e.date.startsWith(mk)).reduce((s, e) => s + e.amount, 0);
+        } else {
+          used[k] = expenses.filter(e => e.cat === k).reduce((s, e) => s + e.amount, 0);
+        }
+      });
+      
+      document.getElementById('budget-grid').innerHTML = Object.keys(CATS).map(k => renderBudgetCard(k, used[k])).join('');
+
+      // Recent Expenses
+      const expContainer = document.getElementById('expenses-container');
+      if (expenses.length === 0) {
+        expContainer.innerHTML = `<p class="empty">the page is still blank — add your first little spend 🍃</p>`;
+      } else {
+        expContainer.innerHTML = `<ul class="elist">` + expenses.slice(0, 12).map(e => {
+          const cat = CATS[e.cat] || CATS.others;
+          return `
+            <li>
+              <span class="edot" style="background: ${cat.tint}"><i data-lucide="${cat.icon}"></i></span>
+              <span class="emain">
+                <span class="enote">${e.note || cat.label}</span>
+                <span class="emeta">${cat.label} · ${e.date}</span>
+              </span>
+              <span class="eamt">${money(e.amount)}</span>
+              <button class="del" onclick="window.delExpense(${e.id})" aria-label="delete"><i data-lucide="trash-2"></i></button>
+            </li>
+          `;
+        }).join('') + `</ul>`;
+      }
+
+      /* Update Assets Tab */
+      const currentTotal = latest ? ASSET_FIELDS.current.reduce((s, f) => s + (latest[f.key] || 0), 0) : 0;
+      const fixedTotal = latest ? ASSET_FIELDS.fixed.reduce((s, f) => s + (latest[f.key] || 0), 0) : 0;
+
+      const snapContainer = document.getElementById('snapshot-container');
+      if (!latest) {
+        snapContainer.innerHTML = `
+          <section class="panel"><p class="empty">no resting places marked yet — log your first entry above 🍃</p></section>
+        `;
+      } else {
+        let snapHtml = `
+          <section class="panel">
+            <div class="snap-head">
+              <h2 style="margin: 0">where she stands</h2>
+              <span class="snap-month">${latest.date}</span>
+            </div>
+            <div class="snap-total">
+              <span class="hlabel">total net worth</span>
+              <span class="snap-big">${money(netWorth)}</span>
+              ${renderDelta(totalDelta)}
+            </div>
+            <div class="snap-sub"><span><i data-lucide="wallet"></i> current</span><b>${money(currentTotal)}</b></div>
+        `;
+        
+        ASSET_FIELDS.current.forEach(f => {
+          const d = renderDelta(prev ? latest[f.key] - (prev[f.key] || 0) : 0);
+          snapHtml += `<div class="line"><span>${f.label}</span><span class="line-r">${money(latest[f.key])} ${d}</span></div>`;
+        });
+
+        snapHtml += `<div class="snap-sub"><span><i data-lucide="mountain"></i> fixed</span><b>${money(fixedTotal)}</b></div>`;
+        ASSET_FIELDS.fixed.forEach(f => {
+          const d = renderDelta(prev ? latest[f.key] - (prev[f.key] || 0) : 0);
+          snapHtml += `<div class="line"><span>${f.label}</span><span class="line-r">${money(latest[f.key])} ${d}</span></div>`;
+        });
+        
+        snapHtml += `</section>`;
+        snapContainer.innerHTML = snapHtml;
+      }
+
+      const trailContainer = document.getElementById('trail-container');
+      if (sorted.length > 0) {
+        trailContainer.innerHTML = `
+          <section class="panel">
+            <h2>the trail behind</h2>
+            <ul class="elist">
+              ${[...sorted].reverse().map(l => {
+                const curTot = ASSET_FIELDS.current.reduce((s, f) => s + (l[f.key] || 0), 0);
+                const fixTot = ASSET_FIELDS.fixed.reduce((s, f) => s + (l[f.key] || 0), 0);
+                return `
+                  <li>
+                    <span class="edot" style="background: var(--sky2)"><i data-lucide="mountain"></i></span>
+                    <span class="emain">
+                      <span class="enote">${l.date}</span>
+                      <span class="emeta">current ${moneyShort(curTot)} · fixed ${moneyShort(fixTot)}</span>
+                    </span>
+                    <span class="eamt">${money(sumLog(l))}</span>
+                    <button class="del" onclick="window.delLog(${l.id})" aria-label="delete"><i data-lucide="trash-2"></i></button>
+                  </li>
+                `;
+              }).join('')}
+            </ul>
+          </section>
+        `;
+      } else {
+        trailContainer.innerHTML = '';
+      }
+
+      /* Re-initialize Lucide Icons for newly injected HTML */
+      lucide.createIcons();
+    };
+
+    /* ------------------------------------------------------------------ */
+    /* Initialization                                                     */
+    /* ------------------------------------------------------------------ */
+    const initForms = () => {
+      document.getElementById('form-current-assets').innerHTML = ASSET_FIELDS.current.map(f => `
+        <div class="field">
+          <label>${f.label}</label>
+          <input type="number" inputmode="decimal" placeholder="0" id="log-${f.key}">
+        </div>
+      `).join('');
+      
+      document.getElementById('form-fixed-assets').innerHTML = ASSET_FIELDS.fixed.map(f => `
+        <div class="field">
+          <label>${f.label}</label>
+          <input type="number" inputmode="decimal" placeholder="0" id="log-${f.key}">
+        </div>
+      `).join('');
+    };
+
+    const init = async () => {
+      document.getElementById('exp-date').value = getTodayStr();
+      document.getElementById('import-file').addEventListener('change', window.handleImport);
+      initForms();
+      resetLogForm();
+      updateUI();
+    };
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        
+        // Hide Login Screen, Show App
+        const loginScreen = document.getElementById('login-screen');
+        loginScreen.style.opacity = '0';
+        setTimeout(() => loginScreen.style.display = 'none', 400);
+        
+        document.getElementById('loading-screen').style.display = 'flex';
+        setupListeners();
+      } else {
+        currentUser = null;
+        cleanupListeners();
+        
+        // Hide App Loader, Show Login Screen
+        document.getElementById('loading-screen').style.display = 'none';
+        
+        const loginScreen = document.getElementById('login-screen');
+        loginScreen.style.display = 'flex';
+        // tiny delay so browser realizes display changed before opacity animates
+        setTimeout(() => loginScreen.style.opacity = '1', 10);
+      }
+    });
+
+    // Run when DOM is ready
+    document.addEventListener("DOMContentLoaded", init);
+
+  </script>
+</body>
+</html>
